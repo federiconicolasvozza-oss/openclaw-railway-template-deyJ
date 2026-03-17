@@ -9,25 +9,60 @@ import httpProxy from "http-proxy";
 import pty from "node-pty";
 import { WebSocketServer } from "ws";
 
-// Patch allowedOrigins
-try {
-  const _configPath = path.join(
-    process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
-    "openclaw.json"
-  );
-  console.log("[patch] config path:", _configPath);
-  console.log("[patch] file exists:", fs.existsSync(_configPath));
-  const _raw = fs.readFileSync(_configPath, "utf8");
-  console.log("[patch] raw length:", _raw.length);
-  console.log("[patch] first 200 chars:", _raw.slice(0, 200));
-} catch(_e) {
-  console.log("[patch] error:", _e.message);
-}
+const PORT = Number.parseInt(process.env.PORT ?? "8080", 10);
+const STATE_DIR =
+  process.env.OPENCLAW_STATE_DIR?.trim() ||
+  path.join(os.homedir(), ".openclaw");
+const WORKSPACE_DIR =
+  process.env.OPENCLAW_WORKSPACE_DIR?.trim() ||
+  path.join(STATE_DIR, "workspace");
+
+const SETUP_PASSWORD = process.env.SETUP_PASSWORD?.trim();
+
+function resolveGatewayToken() {
+  const envTok = process.env.OPENCLAW_GATEWAY_TOKEN?.trim();
+  if (envTok) return envTok;
+
+  const tokenPath = path.join(STATE_DIR, "gateway.token");
+  try {
+    const existing = fs.readFileSync(tokenPath, "utf8").trim();
+    if (existing) return existing;
+  } catch (err) {
+    console.warn(
+      `[gateway-token] could not read existing token: ${err.code || err.message}`,
+    );
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  try {
+    fs.mkdirSync(STATE_DIR, { recursive: true });
+    fs.writeFileSync(tokenPath, generated, { encoding: "utf8", mode: 0o600 });
+  } catch (err) {
+    console.warn(
+      `[gateway-token] could not persist token: ${err.code || err.message}`,
+    );
+  }
   return generated;
 }
 
 const OPENCLAW_GATEWAY_TOKEN = resolveGatewayToken();
 process.env.OPENCLAW_GATEWAY_TOKEN = OPENCLAW_GATEWAY_TOKEN;
+
+// Patch allowedOrigins
+try {
+  const _p = path.join(
+    process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
+    "openclaw.json"
+  );
+  const _c = JSON.parse(fs.readFileSync(_p, "utf8"));
+  if (!_c.gateway) _c.gateway = {};
+  if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
+  _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
+  fs.writeFileSync(_p, JSON.stringify(_c, null, 2));
+  console.log("[patch] allowedOrigins ok");
+} catch(_e) {
+  console.log("[patch] skip:", _e.message);
+}
 
 let cachedOpenclawVersion = null;
 let cachedChannelsHelp = null;
