@@ -63,7 +63,7 @@ try {
   if (!_c.agents) _c.agents = {};
   if (!_c.agents.defaults) _c.agents.defaults = {};
   if (!_c.agents.defaults.model) _c.agents.defaults.model = {};
-  _c.agents.defaults.model.primary = "openai/gpt-5.4";
+  _c.agents.defaults.model.primary = "openai/gpt-4o";
   fs.writeFileSync(_p, JSON.stringify(_c, null, 2));
   console.log("[patch] ok");
 } catch(_e) {
