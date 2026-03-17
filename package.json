@@ -19,3 +19,4 @@
   "pnpm": {
     "onlyBuiltDependencies": ["node-pty"]
   }
+}
