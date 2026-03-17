@@ -15,14 +15,13 @@ try {
     process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
     "openclaw.json"
   );
-  const _c = JSON.parse(fs.readFileSync(_configPath, "utf8"));
-  if (!_c.gateway) _c.gateway = {};
-  if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
-  _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
-  fs.writeFileSync(_configPath, JSON.stringify(_c, null, 2));
-  console.log("[patch] allowedOrigins patched ok");
+  console.log("[patch] config path:", _configPath);
+  console.log("[patch] file exists:", fs.existsSync(_configPath));
+  const _raw = fs.readFileSync(_configPath, "utf8");
+  console.log("[patch] raw length:", _raw.length);
+  console.log("[patch] first 200 chars:", _raw.slice(0, 200));
 } catch(_e) {
-  console.log("[patch] skip:", _e.message);
+  console.log("[patch] error:", _e.message);
 }
   return generated;
 }
