@@ -1,17 +1,22 @@
-// Patch
-try {
-  const _p = path.join(
-    process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
-    "openclaw.json"
-  );
-  const _c = JSON.parse(fs.readFileSync(_p, "utf8"));
-  console.log("[patch] token en json:", _c.gateway?.auth?.token?.slice(0,8));
-  console.log("[patch] token en env:", process.env.OPENCLAW_GATEWAY_TOKEN?.slice(0,8));
-  if (!_c.gateway) _c.gateway = {};
-  if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
-  _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
-  fs.writeFileSync(_p, JSON.stringify(_c, null, 2));
-  console.log("[patch] ok");
-} catch(_e) {
-  console.log("[patch] skip:", _e.message);
+{
+  "name": "openclaw-railway-template",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "lint": "node -c src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "http-proxy": "^1.18.1",
+    "node-pty": "^1.0.0",
+    "ws": "^8.18.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["node-pty"]
+  }
 }
