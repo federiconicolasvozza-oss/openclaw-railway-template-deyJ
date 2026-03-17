@@ -9,39 +9,21 @@ import httpProxy from "http-proxy";
 import pty from "node-pty";
 import { WebSocketServer } from "ws";
 
-const PORT = Number.parseInt(process.env.PORT ?? "8080", 10);
-const STATE_DIR =
-  process.env.OPENCLAW_STATE_DIR?.trim() ||
-  path.join(os.homedir(), ".openclaw");
-const WORKSPACE_DIR =
-  process.env.OPENCLAW_WORKSPACE_DIR?.trim() ||
-  path.join(STATE_DIR, "workspace");
-
-const SETUP_PASSWORD = process.env.SETUP_PASSWORD?.trim();
-
-function resolveGatewayToken() {
-  const envTok = process.env.OPENCLAW_GATEWAY_TOKEN?.trim();
-  if (envTok) return envTok;
-
-  const tokenPath = path.join(STATE_DIR, "gateway.token");
-  try {
-    const existing = fs.readFileSync(tokenPath, "utf8").trim();
-    if (existing) return existing;
-  } catch (err) {
-    console.warn(
-      `[gateway-token] could not read existing token: ${err.code || err.message}`,
-    );
-  }
-
-  const generated = crypto.randomBytes(32).toString("hex");
-  try {
-    fs.mkdirSync(STATE_DIR, { recursive: true });
-    fs.writeFileSync(tokenPath, generated, { encoding: "utf8", mode: 0o600 });
-  } catch (err) {
-    console.warn(
-      `[gateway-token] could not persist token: ${err.code || err.message}`,
-    );
-  }
+// Patch allowedOrigins
+try {
+  const _configPath = path.join(
+    process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
+    "openclaw.json"
+  );
+  const _c = JSON.parse(fs.readFileSync(_configPath, "utf8"));
+  if (!_c.gateway) _c.gateway = {};
+  if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
+  _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
+  fs.writeFileSync(_configPath, JSON.stringify(_c, null, 2));
+  console.log("[patch] allowedOrigins patched ok");
+} catch(_e) {
+  console.log("[patch] skip:", _e.message);
+}
   return generated;
 }
 
