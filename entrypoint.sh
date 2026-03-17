@@ -6,5 +6,4 @@ if [ ! -d /data/.linuxbrew ]; then
 fi
 rm -rf /home/linuxbrew/.linuxbrew
 ln -sfn /data/.linuxbrew /home/linuxbrew/.linuxbrew
-echo "[entrypoint] starting node..."
-exec gosu openclaw node --trace-uncaught src/server.js 2>&1
+exec gosu openclaw node src/server.js
