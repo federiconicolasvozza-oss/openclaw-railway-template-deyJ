@@ -48,7 +48,7 @@ function resolveGatewayToken() {
 const OPENCLAW_GATEWAY_TOKEN = resolveGatewayToken();
 process.env.OPENCLAW_GATEWAY_TOKEN = OPENCLAW_GATEWAY_TOKEN;
 
-// Patch allowedOrigins + model + token
+// Patch
 try {
   const _p = path.join(
     process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw"),
@@ -60,10 +60,6 @@ try {
   if (!_c.gateway) _c.gateway = {};
   if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
   _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
-  if (!_c.agents) _c.agents = {};
-  if (!_c.agents.defaults) _c.agents.defaults = {};
-  if (!_c.agents.defaults.model) _c.agents.defaults.model = {};
-  _c.agents.defaults.model.primary = "openai/gpt-4o";
   fs.writeFileSync(_p, JSON.stringify(_c, null, 2));
   console.log("[patch] ok");
 } catch(_e) {
