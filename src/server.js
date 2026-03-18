@@ -55,11 +55,10 @@ try {
     "openclaw.json"
   );
   const _c = JSON.parse(fs.readFileSync(_p, "utf8"));
-  console.log("[patch] token en json:", _c.gateway?.auth?.token?.slice(0,8));
-  console.log("[patch] token en env:", process.env.OPENCLAW_GATEWAY_TOKEN?.slice(0,8));
   if (!_c.gateway) _c.gateway = {};
   if (!_c.gateway.controlUi) _c.gateway.controlUi = {};
   _c.gateway.controlUi.allowedOrigins = ["https://openclaw-production-0173.up.railway.app"];
+  _c.gateway.controlUi.dangerouslyDisableDeviceAuth = true;
   fs.writeFileSync(_p, JSON.stringify(_c, null, 2));
   console.log("[patch] ok");
 } catch(_e) {
